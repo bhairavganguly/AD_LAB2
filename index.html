@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cat VS Dog Image Classifier</title>
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: #4CAF50;
+        }
+        .upload-section {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        input[type="file"] {
+            display: none;
+        }
+        label {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: #fff;
+            padding: 10px 20px;
+            font-size: 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+        select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        button {
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #imagePreview {
+            margin-top: 15px;
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+            display: none;
+        }
+        .result {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 2rem;
+            }
+            .upload-section {
+                padding: 15px;
+            }
+            label, select, button {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cat vs Dog Classifier</h1>
+        <div class="upload-section">
+            <label for="imageUpload">Choose an Image</label>
+            <input type="file" id="imageUpload" accept="image/*">
+            <img id="imagePreview" alt="Image Preview">
+            <select id="modelSelect">
+                <option value="cnn">CNN Model</option>
+                <option value="logistic">Logistic Regression</option>
+                <option value="kmeans">K-means Clustering</option>
+                <option value="random_forest">Random Forest</option>
+            </select>
+            <button onclick="predict()">Predict</button>
+            <div id="result" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('imageUpload').addEventListener('change', function(e) {
+            const preview = document.getElementById('imagePreview');
+            preview.style.display = 'block';
+            preview.src = URL.createObjectURL(e.target.files[0]);
+        });
+
+        function predict() {
+            const fileInput = document.getElementById('imageUpload');
+            const modelSelect = document.getElementById('modelSelect');
+            const resultDiv = document.getElementById('result');
+
+            if (!fileInput.files[0]) {
+                alert('Please select an image first');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileInput.files[0]);
+            formData.append('model', modelSelect.value);
+
+            fetch('/predict', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                resultDiv.textContent = `Predicted: ${data.result}`;
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                resultDiv.textContent = 'Error processing image';
+            });
+        }
+    </script>
+</body>
+</html>
